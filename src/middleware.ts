@@ -8,15 +8,14 @@ export async function middleware(request: NextRequest) {
 
   const { data: { session } } = await supabase.auth.getSession()
 
-  // Auth routes - redirect if logged in
+  // Redirect to /medicines if logged in and trying to access auth pages
   if (['/auth/signin', '/auth/signup'].includes(request.nextUrl.pathname)) {
     if (session) {
       return NextResponse.redirect(new URL('/medicines', request.url))
     }
-    return response
   }
 
-  // Protected routes - redirect if not logged in
+  // Redirect to login if not logged in and trying to access protected pages
   if (!session && request.nextUrl.pathname.startsWith('/medicines')) {
     return NextResponse.redirect(new URL('/auth/signin', request.url))
   }
