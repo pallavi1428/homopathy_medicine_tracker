@@ -21,10 +21,17 @@ export default function SignIn() {
         email,
         password,
       })
+
       if (authError) throw authError
+
+      // Verify session exists before redirecting
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) throw new Error('Session not created')
+
       router.push('/medicines')
+      router.refresh() // Force client-side update
     } catch (err: any) {
-      setError(err.message)
+      setError(err.message || 'Sign in failed')
     } finally {
       setLoading(false)
     }
@@ -35,7 +42,11 @@ export default function SignIn() {
       <div className="text-center mb-8">
         <h2 className="text-3xl font-bold text-gray-900">Sign In</h2>
       </div>
-      {error && <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-md">{error}</div>}
+      {error && (
+        <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-md text-sm">
+          {error}
+        </div>
+      )}
       <form className="space-y-6" onSubmit={handleSignIn}>
         <div>
           <label htmlFor="email" className="block text-sm font-medium text-gray-700">
@@ -47,7 +58,7 @@ export default function SignIn() {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3"
+            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
         <div>
@@ -60,20 +71,23 @@ export default function SignIn() {
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3"
+            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50"
+          className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
         >
           {loading ? 'Signing in...' : 'Sign In'}
         </button>
       </form>
       <div className="mt-6 text-center text-sm">
-        <Link href="/auth/signup" className="text-blue-600 hover:text-blue-500">
-          Create new account
+        <Link 
+          href="/auth/signup" 
+          className="font-medium text-blue-600 hover:text-blue-500"
+        >
+          Don't have an account? Sign up
         </Link>
       </div>
     </div>
